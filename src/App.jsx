@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { AlumnoPage } from "./AlumnoPage";
+import { PersonalPage } from "./PersonalPage"; // 1. Importas la vista de Personal
 
 // Componente para la pantalla inicial con buscador
 function BuscadorHome() {
   const [inputMatricula, setInputMatricula] = useState("");
+  const [tipo, setTipo] = useState("alumno"); // Permite elegir si es Alumno o Personal
   const navigate = useNavigate();
 
   const handleBuscar = (e) => {
     e.preventDefault();
     if (inputMatricula.trim()) {
-      // Redirige automáticamente a la URL del alumno
-      navigate(`/alumno/${inputMatricula.trim()}`);
+      // Redirige dinámicamente según la opción elegida
+      navigate(`/${tipo}/${inputMatricula.trim()}`);
     }
   };
 
@@ -24,6 +26,32 @@ function BuscadorHome() {
         <p className="text-gray-500 text-sm">
           Escanea el código QR o ingresa la matrícula manualmente:
         </p>
+
+        {/* Selector de Tipo (Alumno / Personal) */}
+        <div className="flex justify-center gap-4 text-sm font-medium">
+          <label className="flex items-center gap-1.5 cursor-pointer text-slate-700">
+            <input
+              type="radio"
+              name="tipoBusqueda"
+              value="alumno"
+              checked={tipo === "alumno"}
+              onChange={() => setTipo("alumno")}
+              className="accent-[#011a39]"
+            />
+            Alumno
+          </label>
+          <label className="flex items-center gap-1.5 cursor-pointer text-slate-700">
+            <input
+              type="radio"
+              name="tipoBusqueda"
+              value="personal"
+              checked={tipo === "personal"}
+              onChange={() => setTipo("personal")}
+              className="accent-[#011a39]"
+            />
+            Personal
+          </label>
+        </div>
 
         <form onSubmit={handleBuscar} className="flex gap-2">
           <input
@@ -49,6 +77,8 @@ function App() {
   return (
     <Routes>
       <Route path="/alumno/:matricula" element={<AlumnoPage />} />
+      {/* 2. Registras la ruta del Personal */}
+      <Route path="/personal/:matricula" element={<PersonalPage />} />
       <Route path="*" element={<BuscadorHome />} />
     </Routes>
   );

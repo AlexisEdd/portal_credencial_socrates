@@ -1,9 +1,11 @@
 import api from "./api";
 
-// Creamos una funcion para obtener lo alumnos
+// Creamos una funcion para obtener lo alumnos, este servise sera el principal, para crear nuestro hook donde
+// alojaremos el alumno en un estado
+
 export async function getAlumnosMatricula(matricula) {
   try {
-    const { data } = await api.get(`/alumno/matricula/${matricula}`);
+    const { data } = await api.get(`/alumnos/${matricula}`);
     return data;
   } catch (error) {
     if (error.response?.status === 404) {
@@ -12,3 +14,4 @@ export async function getAlumnosMatricula(matricula) {
     throw new Error("Error al consultar matricula");
   }
 }
+

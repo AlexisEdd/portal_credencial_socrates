@@ -2,8 +2,8 @@ import React from "react";
 import escudo_Socrates from "../assets/escudo_Socrates.png";
 import {
   UserCheck,
-  GraduationCap,
-  Users,
+  Briefcase,
+  Building2,
   Calendar,
   CalendarDays,
   CheckCircle2,
@@ -13,74 +13,62 @@ import {
 const FOTO_DEFAULT =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='250' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
 
-export function AlumnoCard({ alumno }) {
-  if (!alumno) return null;
+export function PersonalCard({ personal }) {
+  if (!personal) return null;
 
-  const data = Array.isArray(alumno) ? alumno[0] : alumno;
+  const data = Array.isArray(personal) ? personal[0] : personal;
   if (!data) return null;
 
   const {
     matricula = "Sin matrícula",
     nombre = "",
     apellido = "",
-    grado_grupo = "Sin asignar",
+    cargo = "Personal",
+    genero = "No especificado",
     foto_url,
     estatus = "Activo",
-    nivel_educativo,
     seccion,
     ciclo_nombre,
     ciclo,
     vigencia,
-    fecha_expedicion,
-    
   } = data;
 
-  const cctTexto = 
-    data.cct || 
-    seccion?.cct || 
-    seccion?.cct || 
-    "No especificado";
+  const nombreCompleto =
+    `${nombre} ${apellido}`.trim() || "Nombre del Colaborador";
 
-  console.log(cctTexto);
+  // Formateador de fecha seguro contra desfases UTC
+  const formatearFecha = (fechaDb, formatoTexto = false) => {
+    if (!fechaDb) return "No especificada";
 
-  const nombreCompleto = `${nombre} ${apellido}`.trim() || "Nombre del Alumno";
+    // Si viene en formato "2027-07-01" desde SQL
+    if (typeof fechaDb === "string" && fechaDb.includes("-")) {
+      const [anio, mes, dia] = fechaDb.split("T")[0].split("-");
 
-  // Obtención dinámica del Nivel Educativo
-  const obtenerNivelEducativo = () => {
-    if (nivel_educativo) return nivel_educativo;
-    if (seccion?.nombre) return seccion.nombre;
-    if (data.nombre_seccion) return data.nombre_seccion;
+      if (formatoTexto) {
+        // Crea la fecha usando el constructor local (sin desfase UTC)
+        const fechaLocal = new Date(anio, mes - 1, dia);
+        const mesNombre = fechaLocal
+          .toLocaleDateString("es-MX", { month: "long" })
+          .toUpperCase();
+        const diaPad = dia.padStart(2, "0");
+        return `${diaPad} / ${mesNombre} / ${anio}`; // Resultado: "01 / JULIO / 2027"
+      }
 
-    const id = Number(data.id_seccion || seccion?.id_seccion);
-    if (id === 1) return "Primaria";
-    if (id === 2) return "Secundaria";
-    if (id === 3) return "Preparatoria";
-    if (id == 4) return "Preescolar";
+      return `${dia.padStart(2, "0")}/${mes.padStart(2, "0")}/${anio}`; // Resultado: "01/07/2027"
+    }
 
-    return "No especificado";
+    return fechaDb;
   };
 
-  const nivelEducativo = obtenerNivelEducativo();
+  console.log(vigencia);
 
-  // Formateador de Fecha
-  const formatearFecha = (fechaIso, formatoLargo = false) => {
-    if (!fechaIso) return "No especificada";
-    const fecha = new Date(fechaIso);
-    return fecha.toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: formatoLargo ? "long" : "numeric",
-      year: "numeric",
-    });
-  };
+  const seccionTexto =
+    typeof seccion === "string"
+      ? seccion
+      : seccion?.nombre_seccion || seccion?.nombre || "General";
 
-  const vigenciaTexto = vigencia || "Agosto 2026 - Julio 2027";
   const cicloTexto = ciclo_nombre || ciclo?.nombre || "2026 - 2027";
-  const expedicionTexto =
-    formatearFecha(fecha_expedicion, true) !== "No especificada"
-      ? formatearFecha(fecha_expedicion, true)
-      : "01 de agosto de 2026";
 
-  // Fecha y hora actual de la consulta
   const fechaConsulta = new Date().toLocaleDateString("es-MX", {
     day: "numeric",
     month: "long",
@@ -90,6 +78,7 @@ export function AlumnoCard({ alumno }) {
   const horaConsulta = new Date().toLocaleTimeString("es-MX", {
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
     hour12: true,
   });
 
@@ -117,7 +106,7 @@ export function AlumnoCard({ alumno }) {
               <p className="text-xs text-slate-400">
                 Consulta realizada el
                 <br />
-                {fechaConsulta}, Hora: {horaConsulta}
+                {fechaConsulta}, Hora {horaConsulta}
               </p>
             </div>
           </div>
@@ -127,9 +116,8 @@ export function AlumnoCard({ alumno }) {
       {/* 2. Cuerpo Principal (Tarjeta Blanca Central) */}
       <main className="flex-grow px-4 -mt-2 pb-12">
         <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl p-6 sm:p-10 border border-slate-100">
-          {/* Bloque del Perfil del Alumno */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start pb-8 border-b border-slate-100">
-            {/* Foto del Alumno */}
+            {/* Foto del Personal */}
             <div className="md:col-span-4 flex justify-center">
               <div className="w-full max-w-[240px] aspect-[4/5] rounded-2xl overflow-hidden shadow-md border border-slate-200">
                 <img
@@ -144,7 +132,7 @@ export function AlumnoCard({ alumno }) {
               </div>
             </div>
 
-            {/* Datos del Alumno */}
+            {/* Datos del Personal */}
             <div className="md:col-span-8 flex flex-col justify-between h-full">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0b1329] mb-6 text-center md:text-left">
                 {nombreCompleto}
@@ -181,17 +169,17 @@ export function AlumnoCard({ alumno }) {
                   </div>
                 </div>
 
-                {/* Nivel Educativo */}
+                {/* Cargo */}
                 <div className="flex items-start gap-3">
                   <div className="p-2.5 bg-slate-100 text-slate-600 rounded-xl">
-                    <GraduationCap className="w-5 h-5" />
+                    <Briefcase className="w-5 h-5" />
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 font-medium">
-                      Nivel Educativo
+                      Cargo / Función
                     </p>
                     <p className="font-bold text-slate-900 text-base">
-                      {nivelEducativo}
+                      {cargo}
                     </p>
                   </div>
                 </div>
@@ -206,22 +194,22 @@ export function AlumnoCard({ alumno }) {
                       Vigencia
                     </p>
                     <p className="font-bold text-slate-900 text-base leading-tight">
-                      {vigenciaTexto}
+                      {vigencia}
                     </p>
                   </div>
                 </div>
 
-                {/* Grado y Grupo */}
+                {/* Área / Sección */}
                 <div className="flex items-start gap-3">
                   <div className="p-2.5 bg-slate-100 text-slate-600 rounded-xl">
-                    <Users className="w-5 h-5" />
+                    <Building2 className="w-5 h-5" />
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 font-medium">
-                      Grado y Grupo
+                      Área / Sección
                     </p>
                     <p className="font-bold text-slate-900 text-base">
-                      {grado_grupo}
+                      {seccionTexto}
                     </p>
                   </div>
                 </div>
@@ -236,7 +224,7 @@ export function AlumnoCard({ alumno }) {
                       Estado
                     </p>
                     <span className="inline-block bg-emerald-50 text-emerald-800 text-xs font-bold px-3 py-1 rounded-md uppercase tracking-wider">
-                      ALUMNO {estatus}
+                      PERSONAL {estatus}
                     </span>
                   </div>
                 </div>
@@ -251,13 +239,21 @@ export function AlumnoCard({ alumno }) {
             </h3>
 
             <div className="space-y-3 text-sm">
+              {/* <div className="flex justify-between items-center py-1">
+                <span className="text-slate-500">Fecha de Expedición</span>
+                <span className="font-medium text-slate-800">
+                  {expedicionTexto}
+                </span> */}
+
               <div className="flex justify-between items-center py-1">
-                <span className="text-slate-500">CCT</span>
-                <span className="font-medium text-slate-800">{cctTexto}</span>
+                <span className="text-slate-500">CCT:</span>
+                <span className="font-medium text-slate-800">{genero}</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-slate-500">Tipo de Credencial</span>
-                <span className="font-medium text-slate-800">Alumno</span>
+                <span className="font-medium text-slate-800">
+                  Personal / Administrativo
+                </span>
               </div>
             </div>
           </div>
