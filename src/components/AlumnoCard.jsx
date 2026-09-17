@@ -35,13 +35,24 @@ export function AlumnoCard({ alumno }) {
     
   } = data;
 
-  const cctTexto = 
-    data.cct || 
-    seccion?.cct || 
-    seccion?.cct || 
-    "No especificado";
+  const obtenerCct = () => {
+    // 1. Si la API ya trae la CCT explícitamente en el objeto, usar esa
+    if (data.cct) return data.cct;
+    if (seccion?.cct) return seccion.cct;
 
-  console.log(cctTexto);
+    // 2. Mapeo fallback según el ID de Sección o Nombre del Nivel
+    const idSeccion = Number(data.id_seccion || seccion?.id_seccion);
+    const nivel = (nivel_educativo || seccion?.nombre || data.nombre_seccion || "").toLowerCase();
+
+    if (idSeccion === 1 || nivel.includes("primaria")) return "12PPR0233W";
+    if (idSeccion === 2 || nivel.includes("secundaria")) return "12PES0137M";
+    if (idSeccion === 3 || nivel.includes("preparatoria")) return "INS. SOC-250997";
+    if (idSeccion === 4 || nivel.includes("preescolar")) return "12PJN0169V";
+
+    return "No especificado";
+  };
+
+  const cctTexto = obtenerCct();
 
   const nombreCompleto = `${nombre} ${apellido}`.trim() || "Nombre del Alumno";
 
