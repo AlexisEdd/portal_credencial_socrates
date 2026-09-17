@@ -268,7 +268,7 @@ export function AlumnoCard({ alumno }) {
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-slate-500">Tipo de Credencial</span>
-                <span className="font-medium text-slate-800">Alumno</span>
+                <span className="font-medium text-RED-800">ESTUDIANTE</span>
               </div>
             </div>
           </div>
