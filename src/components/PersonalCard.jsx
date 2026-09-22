@@ -26,6 +26,7 @@ export function PersonalCard({ personal }) {
     cargo = "Personal",
     genero = "No especificado",
     foto_url,
+    nivel_educativo,
     estatus = "Activo",
     seccion,
     ciclo_nombre,
