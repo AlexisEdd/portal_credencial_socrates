@@ -77,7 +77,6 @@ function App() {
   return (
     <Routes>
       <Route path="/alumno/:matricula" element={<AlumnoPage />} />
-      {/* 2. Registras la ruta del Personal */}
       <Route path="/personal/:matricula" element={<PersonalPage />} />
       <Route path="*" element={<BuscadorHome />} />
     </Routes>

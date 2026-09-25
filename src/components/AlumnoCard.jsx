@@ -232,7 +232,7 @@ export function AlumnoCard({ alumno }) {
                       Grado y Grupo
                     </p>
                     <p className="font-bold text-slate-900 text-base">
-                      {grado_grupo}
+                      {grado_grupo}° A
                     </p>
                   </div>
                 </div>

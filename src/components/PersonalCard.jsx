@@ -34,6 +34,59 @@ export function PersonalCard({ personal }) {
     vigencia,
   } = data;
 
+  // 1. Obtener el ID de la sección de forma limpia y segura
+  const obtenerIdSeccion = () => {
+    const rawId =
+      data.id_seccion ??
+      seccion?.id_seccion ??
+      data.id_nivel ??
+      (typeof seccion === "number" ? seccion : null);
+
+    return rawId !== null && rawId !== undefined ? Number(rawId) : null;
+  };
+
+  const idSeccion = obtenerIdSeccion();
+
+  // 2. Mapeo dinámico de Nivel Educativo por ID (o texto como fallback)
+  const obtenerNivelEducativo = () => {
+    if (idSeccion === 1) return "Primaria";
+    if (idSeccion === 2) return "Secundaria";
+    if (idSeccion === 3) return "Preparatoria";
+    if (idSeccion === 4) return "Preescolar";
+
+    if (nivel_educativo) return nivel_educativo;
+    if (typeof seccion === "string") return seccion;
+    if (seccion?.nombre_seccion) return seccion.nombre_seccion;
+    if (seccion?.nombre) return seccion.nombre;
+    if (data.nombre_seccion) return data.nombre_seccion;
+
+    return "No especificado";
+  };
+
+  const nivelEducativo = obtenerNivelEducativo();
+
+  // 3. Mapeo directo de CCT usando el ID de Sección o fallback por nombre
+  const obtenerCct = () => {
+    // Por ID de sección
+    if (idSeccion === 1) return "12PPR0233W";
+    if (idSeccion === 2) return "12PES0137M";
+    if (idSeccion === 3) return "INS. SOC-250997";
+    if (idSeccion === 4) return "12PJN0169V";
+
+    // Fallback si por alguna razón no viene el ID pero viene el texto del nivel
+    const nivelTexto = nivelEducativo.toLowerCase();
+    if (nivelTexto.includes("primaria")) return "12PPR0233W";
+    if (nivelTexto.includes("secundaria")) return "12PES0137M";
+    if (nivelTexto.includes("preparatoria") || nivelTexto.includes("prepa"))
+      return "INS. SOC-250997";
+    if (nivelTexto.includes("preescolar") || nivelTexto.includes("kinder"))
+      return "12PJN0169V";
+
+    return "No especificado";
+  };
+
+  const cctTexto = obtenerCct();
+
   const nombreCompleto =
     `${nombre} ${apellido}`.trim() || "Nombre del Colaborador";
 
@@ -41,52 +94,25 @@ export function PersonalCard({ personal }) {
   const formatearFecha = (fechaDb, formatoTexto = false) => {
     if (!fechaDb) return "No especificada";
 
-    // Si viene en formato "2027-07-01" desde SQL
     if (typeof fechaDb === "string" && fechaDb.includes("-")) {
       const [anio, mes, dia] = fechaDb.split("T")[0].split("-");
 
       if (formatoTexto) {
-        // Crea la fecha usando el constructor local (sin desfase UTC)
         const fechaLocal = new Date(anio, mes - 1, dia);
         const mesNombre = fechaLocal
           .toLocaleDateString("es-MX", { month: "long" })
           .toUpperCase();
         const diaPad = dia.padStart(2, "0");
-        return `${diaPad} / ${mesNombre} / ${anio}`; // Resultado: "01 / JULIO / 2027"
+        return `${diaPad} / ${mesNombre} / ${anio}`;
       }
 
-      return `${dia.padStart(2, "0")}/${mes.padStart(2, "0")}/${anio}`; // Resultado: "01/07/2027"
+      return `${dia.padStart(2, "0")}/${mes.padStart(2, "0")}/${anio}`;
     }
 
     return fechaDb;
   };
 
-  console.log(vigencia);
-
-    const obtenerCct = () => {
-    // 1. Si la API ya trae la CCT explícitamente en el objeto, usar esa
-    if (data.cct) return data.cct;
-    if (seccion?.cct) return seccion.cct;
-
-    // 2. Mapeo fallback según el ID de Sección o Nombre del Nivel
-    const idSeccion = Number(data.id_seccion || seccion?.id_seccion);
-    const nivel = (nivel_educativo || seccion?.nombre || data.nombre_seccion || "").toLowerCase();
-
-    if (idSeccion === 1 || nivel.includes("primaria")) return "12PPR0233W";
-    if (idSeccion === 2 || nivel.includes("secundaria")) return "12PES0137M";
-    if (idSeccion === 3 || nivel.includes("preparatoria")) return "INS. SOC-250997";
-    if (idSeccion === 4 || nivel.includes("preescolar")) return "12PJN0169V";
-
-    return "No especificado";
-  };
-
-  const cctTexto = obtenerCct();
-
-  const seccionTexto =
-    typeof seccion === "string"
-      ? seccion
-      : seccion?.nombre_seccion || seccion?.nombre || "General";
-
+  const seccionTexto = nivelEducativo;
   const cicloTexto = ciclo_nombre || ciclo?.nombre || "2026 - 2027";
 
   const fechaConsulta = new Date().toLocaleDateString("es-MX", {
@@ -220,7 +246,7 @@ export function PersonalCard({ personal }) {
                 </div>
 
                 {/* Área / Sección */}
-                <div className="flex items-start gap-3">
+                {/* <div className="flex items-start gap-3">
                   <div className="p-2.5 bg-slate-100 text-slate-600 rounded-xl">
                     <Building2 className="w-5 h-5" />
                   </div>
@@ -232,9 +258,9 @@ export function PersonalCard({ personal }) {
                       {seccionTexto}
                     </p>
                   </div>
-                </div>
+                </div> */}
 
-                {/* Estado */}
+                {/* Estatus */}
                 <div className="flex items-start gap-3">
                   <div className="p-1 text-emerald-600">
                     <CheckCircle2 className="w-7 h-7 fill-emerald-100" />
@@ -259,12 +285,6 @@ export function PersonalCard({ personal }) {
             </h3>
 
             <div className="space-y-3 text-sm">
-              {/* <div className="flex justify-between items-center py-1">
-                <span className="text-slate-500">Fecha de Expedición</span>
-                <span className="font-medium text-slate-800">
-                  {expedicionTexto}
-                </span> */}
-
               <div className="flex justify-between items-center py-1">
                 <span className="text-slate-500">CCT:</span>
                 <span className="font-medium text-slate-800">{cctTexto}</span>
